@@ -144,12 +144,5 @@ batch_parse_sv <- function(list_ann_manta_files) {
       joined_df <- rbind(joined_df, parsed_sv)
     }
   }
-  
-  sort_order <- joined_df %>% 
-    group_by(gene) %>%
-    count %>%
-    pull(gene)
-  
-  joined_df <- joined_df[order(factor(joined_df$genes,levels=c(sort_order))),]
   return(joined_df)
 }
