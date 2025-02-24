@@ -26,7 +26,7 @@ parse_snpeff_annotated_sv <- function(ann_manta_VRanges) {
   return(list(genes, multiple_genes, svtype))
 }
 
-genes_list_post_processing <- function(sv_ann_df, filter_cutoff = 15) {
+genes_list_post_processing <- function(sv_ann_df, filter_cutoff = 15, remove_LOCI = TRUE) {
   for (i in 1:length(sv_ann_df$multi)) {
     if (!is.na(sv_ann_df$multi[i]) && sv_ann_df$multi[i] == "") {
       sv_ann_df$multi[i] <- NA
@@ -84,25 +84,13 @@ genes_list_post_processing <- function(sv_ann_df, filter_cutoff = 15) {
     }
   }
   
-  len_gene_column <- length(single_genes)
-  for (i in 1:len_gene_column) {
-    if (!is.na(single_genes[i])) {
-      split_str <- strsplit(single_genes[i], "-", fixed = TRUE)[[1]]
-      if (length(split_str) > 1) {
-        for (j in 2:length(split_str)) {
-          single_genes <- append(single_genes, split_str[j])
-          events <- append(events, events[i])
-        }
-        single_genes[i] <- split_str[1]
-      }
-    }
-  }
-
   proccessed_sv_annotations <- data.frame(x=single_genes, y=events)
   colnames(proccessed_sv_annotations) <- c("gene", "event")
   
   proccessed_sv_annotations <- proccessed_sv_annotations[complete.cases(proccessed_sv_annotations), ]
-  proccessed_sv_annotations <- proccessed_sv_annotations[grep("^[LOC]{3}", proccessed_sv_annotations$gene, invert = TRUE), ]
+  if (remove_LOCI) {
+    proccessed_sv_annotations <- proccessed_sv_annotations[grep("^[LOC]{3}", proccessed_sv_annotations$gene, invert = TRUE), ]
+    }
   proccessed_sv_annotations$count <- rep(1, nrow(proccessed_sv_annotations))
   
   low_gene_count <- proccessed_sv_annotations %>% 
