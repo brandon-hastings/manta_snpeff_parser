@@ -4,11 +4,13 @@ library(tidyr)
 library(ggplot2)
 
 parse_snpeff_annotated_sv <- function(ann_manta_VRanges) {
+  chrs <- c(rep(NA, length(ann_manta_VRanges)))
   genes <- c(rep(NA, length(ann_manta_VRanges)))
   multiple_genes <- c(rep(NA, length(ann_manta_VRanges)))
   svtype <- c(rep(NA, length(ann_manta_VRanges)))
   for (i in 1:length(ann_manta_VRanges)) {
     svtype[i] <- ann_manta_VRanges[i,]$SVTYPE
+    chrs[i] <- as.character(ann_manta_VRanges@seqnames[i]@values)
     ann_text <- ann_manta_VRanges[i,]$ANN[[1]]
     if (length(ann_text) == 0) {
       genes[i] <- NA
@@ -23,7 +25,7 @@ parse_snpeff_annotated_sv <- function(ann_manta_VRanges) {
       genes[i] <- gene
     }
   }
-  return(list(genes, multiple_genes, svtype))
+  return(list(chrs, genes, multiple_genes, svtype))
 }
 
 genes_list_post_processing <- function(sv_ann_df, filter_cutoff = 15, remove_LOCI = TRUE) {
@@ -114,7 +116,7 @@ parse_sv <- function(ann_manta_file) {
   
   # construct df from genes list
   sv_genes_df <- data.frame(genes_lists)
-  colnames(sv_genes_df) <- c("single", "multi", "event")
+  colnames(sv_genes_df) <- c("chromosome", "single", "multi", "event")
   
   processed_sv_genes_df <- genes_list_post_processing(sv_genes_df)
   print("Proccessed file")
